@@ -1,0 +1,54 @@
+services:
+  app1:
+    container_name: app1_container
+    build: ./src/serviceA/.
+    ports:
+      - 8001:8001
+    environment:
+      - DB_HOST=db
+      - DB_USER=admin
+      - DB_PASSWORD=123
+      - DB_NAME=midb
+      - DB_PORT=5432
+    depends_on:
+      - db
+  
+  app2:
+    container_name: app2_container
+    build: ./src/serviceB/.
+    ports:
+      - 8000:8000
+    environment:
+      - DB_HOST=db
+      - DB_USER=admin
+      - DB_PASSWORD=123
+      - DB_NAME=midb
+      - DB_PORT=5432
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres:15
+    container_name: db-container
+    environment:
+      DB_USER: admin  
+      DB_PASSWORD: 123
+      DB_NAME: midb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready","-U","admin","-d","midb"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: shared_net
+    external: true
